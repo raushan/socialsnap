@@ -18,12 +18,12 @@
         android:text="View Pictures Taken Near You" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/take_picture_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/view_image_button"
         android:layout_below="@+id/view_image_button"
-        android:layout_marginTop="93dp"
-        android:text="Button" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="96dp"
+        android:text="Take a Picture" />
 
 </RelativeLayout>

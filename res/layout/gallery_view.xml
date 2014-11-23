@@ -1,0 +1,63 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.cmsc436.socialsnap.MainActivity" >
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="158dp"
+        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+
+    <ImageView
+        android:id="@+id/ImageView01"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignTop="@+id/imageView1"
+        android:layout_marginLeft="14dp"
+        android:layout_toRightOf="@+id/imageView1"
+        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+
+    <ImageView
+        android:id="@+id/ImageView02"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignTop="@+id/ImageView01"
+        android:layout_marginLeft="18dp"
+        android:layout_toRightOf="@+id/ImageView01"
+        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+
+    <ImageView
+        android:id="@+id/ImageView03"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_below="@+id/ImageView01"
+        android:layout_marginTop="32dp"
+        android:layout_toLeftOf="@+id/ImageView01"
+        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+
+    <ImageView
+        android:id="@+id/ImageView04"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignTop="@+id/ImageView03"
+        android:layout_toLeftOf="@+id/ImageView02"
+        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+
+    <ImageView
+        android:id="@+id/ImageView05"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignLeft="@+id/ImageView02"
+        android:layout_alignTop="@+id/ImageView04"
+        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+
+</RelativeLayout>
