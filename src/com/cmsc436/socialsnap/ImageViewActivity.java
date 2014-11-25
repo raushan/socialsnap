@@ -5,73 +5,44 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class ImageViewActivity extends Activity {
 
-	private static final int CAMERA_REQUEST_CODE = 100;
-	private Bitmap photo = null;
 	private LocationManager locationManager;
-
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-
-		final Button takePictureButton = (Button) findViewById(R.id.take_picture_button);
-		takePictureButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-				Boolean isGPSEnabled = locationManager
-						.isProviderEnabled(LocationManager.GPS_PROVIDER);
-				
-				//Check if GPS is enabled before starting new activity
-				if (isGPSEnabled) {
-					Intent cameraIntent = new Intent(
-							android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-					startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-				} else {
-					showSettingsAlert();
-				}
-			}
-		});
-
-		final Button viewPicturesButton = (Button) findViewById(R.id.view_pictures_button);
-		viewPicturesButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent galleryIntent = new Intent(MainActivity.this,
-						GridLayoutActivity.class);
-				startActivity(galleryIntent);
-			}
-		});
-
+		
+		setContentView(R.layout.viewimage);
+	
+		Intent intent = getIntent();
+		
+		ImageView imageView = (ImageView) findViewById(R.id.photoView);
+		TextView textView = (TextView) findViewById(R.id.caption);
+		
+		// Get the ID of the image to display and set it as the image for this ImageView
+		imageView.setImageResource(intent.getIntExtra(GridLayoutActivity.EXTRA_RES_ID, 0));
+		textView.setText("caption here");
+		
+		
+		
 	}
-
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
-			// Obtain photo from camera
-			photo = (Bitmap) data.getExtras().get("data");
-			// Pass photo to upload activity
-			Intent uploadIntent = new Intent(MainActivity.this, UploadUI.class);
-			uploadIntent.putExtra("photo", photo);
-			startActivity(uploadIntent);
-		}
-	}
-
-	@Override
+	
+	
+	
+	
+	
+	/* ============ ACTION BAR ============= */
+	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
@@ -94,7 +65,7 @@ public class MainActivity extends Activity {
 			if (isGPSEnabled) {
 				Intent cameraIntent = new Intent(
 						android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-				startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+				startActivityForResult(cameraIntent, 100);
 			} else {
 				showSettingsAlert();
 			}
@@ -107,7 +78,8 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
+	
+	
 	public void showSettingsAlert() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
@@ -142,5 +114,7 @@ public class MainActivity extends Activity {
 	private void makeToast(String str) {
 		Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
 	}
-
+	
+	
+	
 }

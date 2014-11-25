@@ -1,77 +1,71 @@
 package com.cmsc436.socialsnap;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 
-public class MainActivity extends Activity {
+public class GridLayoutActivity extends Activity {
 
-	private static final int CAMERA_REQUEST_CODE = 100;
-	private Bitmap photo = null;
+	protected static final String EXTRA_RES_ID = "POS";
+	
 	private LocationManager locationManager;
+	
+	private ArrayList<Integer> mThumbIdsFlowers = new ArrayList<Integer>(
+			Arrays.asList(R.drawable.image1, R.drawable.image2,
+					R.drawable.image3, R.drawable.image4, R.drawable.image5,
+					R.drawable.image6, R.drawable.image7, R.drawable.image8,
+					R.drawable.image9, R.drawable.image10, R.drawable.image11,
+					R.drawable.image12));
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.gallery);
 
-		final Button takePictureButton = (Button) findViewById(R.id.take_picture_button);
-		takePictureButton.setOnClickListener(new OnClickListener() {
+		GridView gridview = (GridView) findViewById(R.id.gridview);
 
-			@Override
-			public void onClick(View v) {
-				locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-				Boolean isGPSEnabled = locationManager
-						.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		// Create a new ImageAdapter and set it as the Adapter for this GridView
+		gridview.setAdapter(new ImageAdapter(this, mThumbIdsFlowers));
+
+		// Set an setOnItemClickListener on the GridView
+		gridview.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View v,
+					int position, long id) {
 				
-				//Check if GPS is enabled before starting new activity
-				if (isGPSEnabled) {
-					Intent cameraIntent = new Intent(
-							android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-					startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-				} else {
-					showSettingsAlert();
-				}
+				//Create an Intent to start the ImageViewActivity
+				Intent intent = new Intent(GridLayoutActivity.this,
+						ImageViewActivity.class);
+				
+				// Add the ID of the thumbnail to display as an Intent Extra
+				intent.putExtra(EXTRA_RES_ID, (int) id);
+				
+				// Start the ImageViewActivity
+				startActivity(intent);
 			}
 		});
-
-		final Button viewPicturesButton = (Button) findViewById(R.id.view_pictures_button);
-		viewPicturesButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent galleryIntent = new Intent(MainActivity.this,
-						GridLayoutActivity.class);
-				startActivity(galleryIntent);
-			}
-		});
-
 	}
-
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
-			// Obtain photo from camera
-			photo = (Bitmap) data.getExtras().get("data");
-			// Pass photo to upload activity
-			Intent uploadIntent = new Intent(MainActivity.this, UploadUI.class);
-			uploadIntent.putExtra("photo", photo);
-			startActivity(uploadIntent);
-		}
-	}
-
-	@Override
+	
+	
+	
+	
+	
+	/* ============ ACTION BAR ============= */
+	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
@@ -94,7 +88,7 @@ public class MainActivity extends Activity {
 			if (isGPSEnabled) {
 				Intent cameraIntent = new Intent(
 						android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-				startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+				startActivityForResult(cameraIntent, 100);
 			} else {
 				showSettingsAlert();
 			}
@@ -107,7 +101,8 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
+	
+	
 	public void showSettingsAlert() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
@@ -142,5 +137,4 @@ public class MainActivity extends Activity {
 	private void makeToast(String str) {
 		Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
 	}
-
 }
