@@ -21,7 +21,7 @@ public class MainActivity extends Activity {
 	private static final int CAMERA_REQUEST_CODE = 100;
 	private Bitmap photo = null;
 	private LocationManager locationManager;
-
+	// Test
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
