@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import com.cmsc436.socialsnap.R;
 
 public class GridLayoutActivity extends Activity {
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.socialsnap"
+    package="com.cmsc436.socialsnap"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -13,9 +13,12 @@
         android:required="false" >
     </uses-feature>
 
-    <uses-permission android:name="android.permission.INTERNET" >
-    </uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="18" />
+    <uses-permission 
+        android:name="android.permission.INTERNET" />
+    <uses-permission 
+        android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -60,8 +63,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.socialsnap.UploadUI"
-            android:parentActivityName="com.example.socialsnap.MainActivity"
+            android:name="com.cmsc436.socialsnap.UploadUI"
+            android:parentActivityName="com.cmsc436.socialsnap.MainActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
     </application>
