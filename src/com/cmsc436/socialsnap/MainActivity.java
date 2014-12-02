@@ -7,7 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,10 +19,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MainActivity extends Activity {
 
 	private static final int CAMERA_REQUEST_CODE = 100;
 	private Bitmap photo = null;
+	private Uri photoUri = null;
 	private LocationManager locationManager;
 	// Test
 	@Override
@@ -29,18 +38,21 @@ public class MainActivity extends Activity {
 
 		final Button takePictureButton = (Button) findViewById(R.id.take_picture_button);
 		takePictureButton.setOnClickListener(new OnClickListener() {
-
-			@Override
 			public void onClick(View v) {
 				locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 				Boolean isGPSEnabled = locationManager
 						.isProviderEnabled(LocationManager.GPS_PROVIDER);
-				
 				//Check if GPS is enabled before starting new activity
 				if (isGPSEnabled) {
-					Intent cameraIntent = new Intent(
-							android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-					startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+				    try {
+				        File photoFile = createImageFile();
+				        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				        photoUri = Uri.fromFile(photoFile);
+				        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+	                    startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+                    } catch (IOException e) {
+                        Toast.makeText(MainActivity.this, "Unable to write image" , Toast.LENGTH_LONG).show();
+                    }
 				} else {
 					showSettingsAlert();
 				}
@@ -49,8 +61,6 @@ public class MainActivity extends Activity {
 
 		final Button viewPicturesButton = (Button) findViewById(R.id.view_pictures_button);
 		viewPicturesButton.setOnClickListener(new OnClickListener() {
-
-			@Override
 			public void onClick(View v) {
 				Intent galleryIntent = new Intent(MainActivity.this,
 						GridLayoutActivity.class);
@@ -66,9 +76,27 @@ public class MainActivity extends Activity {
 			photo = (Bitmap) data.getExtras().get("data");
 			// Pass photo to upload activity
 			Intent uploadIntent = new Intent(MainActivity.this, UploadUI.class);
-			uploadIntent.putExtra("photo", photo);
+			uploadIntent.putExtra("photoBitmap", photo);
+			uploadIntent.putExtra("photoUri", photoUri.toString());
 			startActivity(uploadIntent);
 		}
+	}
+	
+	private File createImageFile() throws IOException {
+	    // Create an image file name
+	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    String imageFileName = "JPEG_" + timeStamp + "_";
+	    File storageDir = Environment.getExternalStoragePublicDirectory(
+	            Environment.DIRECTORY_PICTURES);
+	    File image = File.createTempFile(
+	        imageFileName,  /* prefix */
+	        ".jpg",         /* suffix */
+	        storageDir      /* directory */
+	    );
+
+	    // Save a file: path for use with ACTION_VIEW intents
+	    // mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+	    return image;
 	}
 
 	@Override

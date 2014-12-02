@@ -32,9 +32,6 @@ public class ImageViewActivity extends Activity {
 		// Get the ID of the image to display and set it as the image for this ImageView
 		imageView.setImageResource(intent.getIntExtra(GridLayoutActivity.EXTRA_RES_ID, 0));
 		textView.setText("caption here");
-		
-		
-		
 	}
 	
 	
