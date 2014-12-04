@@ -9,6 +9,12 @@
         android:showAsAction="always"
         android:title="@string/counter"/>
     <item
+        android:id="@+id/action_camera"
+		android:icon="@drawable/ic_action_camera"
+        android:showAsAction="always"
+        android:title="@string/camera"/>
+    
+    <item
         android:id="@+id/action_upload"
         android:icon="@drawable/ic_action_upload"
         android:showAsAction="always"

@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.socialsnap.MainActivity" >
+    tools:context="com.cmsc436.socialsnap.MainActivity" >
 
     <TextView
         android:id="@+id/textView1"
@@ -17,22 +17,28 @@
         android:layout_marginTop="40dp"
         android:text="@string/social_snap" />
 
-    <Button
-        android:id="@+id/take_picture_button"
-        android:layout_width="140dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="119dp"
-        android:text="@string/take_picture" />
+     <Button
+         android:id="@+id/take_picture_button"
+         android:layout_width="140dp"
+         android:layout_height="wrap_content"
+         android:layout_below="@+id/textView1"
+         android:layout_centerHorizontal="true"
+         android:layout_marginTop="148dp"
+         android:background="@drawable/buttonshape"
+         android:text="@string/take_picture"
+         android:fontFamily="sans-serif-light" 
+         android:textColor="#000000" />
 
-    <Button
-        android:id="@+id/view_pictures_button"
-        android:layout_width="140dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/take_picture_button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="@string/view_pictures" />
+     <Button
+         android:id="@+id/view_pictures_button"
+         android:layout_width="140dp"
+         android:layout_height="wrap_content"
+         android:layout_alignLeft="@+id/take_picture_button"
+         android:layout_below="@+id/take_picture_button"
+         android:layout_marginTop="16dp"
+         android:background="@drawable/buttonshape"
+         android:text="@string/view_pictures"
+         android:fontFamily="sans-serif-light" 
+         android:textColor="#000000" />
 
 </RelativeLayout>

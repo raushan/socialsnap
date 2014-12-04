@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
+    android:background="#e5e5e5"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -13,6 +14,7 @@
             android:id="@+id/photoView"
             android:layout_width="match_parent"
             android:layout_height="400dp"
+            
             android:contentDescription="@null"
             android:padding="8dp" />
 
@@ -22,34 +24,46 @@
             android:layout_below="@+id/photoView"
             android:layout_margin="8dp" >
 
-            <TextView
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_action_location_foundcopy" />
+
+            <!--
+                 <TextView
                 android:id="@+id/location_string"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/location_string"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
+            -->
 
             <TextView
                 android:id="@+id/location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/location_string"
+                android:layout_alignBaseline="@+id/icon"
                 android:layout_marginLeft="5dp"
-                android:layout_toRightOf="@+id/location_string"
+                android:layout_marginTop="14dp"
+                android:layout_toRightOf="@+id/icon"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
             <EditText
                 android:id="@+id/comment"
+                android:background="@drawable/rounded_corner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/location_string"
+                android:layout_below="@+id/icon"
                 android:layout_marginTop="5dp"
                 android:ems="10"
-                android:maxLength="80"
                 android:hint="@string/add_comment"
-                android:inputType="textMultiLine" >
+                android:lines="3"
+                android:maxLength="80"
+                android:maxLines="3" >
 
                 <requestFocus />
             </EditText>
