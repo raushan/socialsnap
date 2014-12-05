@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.socialsnap.MainActivity" >
+
+    <item
+        android:id="@+id/action_camera"
+		android:icon="@drawable/ic_action_camera"
+        android:showAsAction="always"
+        android:title="@string/camera"/>
+    
+      <item
+        android:id="@+id/refresh"
+        android:icon="@drawable/ic_action_refresh"
+        android:showAsAction="always"
+        android:title="@string/refresh"/>
+     
+     
+
+</menu>

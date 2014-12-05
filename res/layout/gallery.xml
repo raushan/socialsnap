@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+
+    <fragment 
+	  android:id="@+id/map"
+	  android:layout_width="match_parent"
+	  android:layout_height="165dp"
+	  android:layout_margin="3dp"
+	  class="com.google.android.gms.maps.SupportMapFragment"/>
     
     <GridView
         android:id="@+id/gridview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/map"
+        android:padding="3dp"
         android:columnWidth="90dp"
         android:gravity="center"
         android:horizontalSpacing="5dp"
@@ -15,4 +24,4 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="5dp" />
 
-</LinearLayout>
+</RelativeLayout>

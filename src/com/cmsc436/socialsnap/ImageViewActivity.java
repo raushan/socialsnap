@@ -1,10 +1,13 @@
 package com.cmsc436.socialsnap;
 
+import com.example.socialsnap.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -15,15 +18,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ImageViewActivity extends Activity {
-
-	private LocationManager locationManager;
 	
+	private LocationManager locationManager;
+	private static final int CAMERA_REQUEST_CODE = 100;
+	private Bitmap photo = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.viewimage);
-	
 		Intent intent = getIntent();
 		
 		ImageView imageView = (ImageView) findViewById(R.id.photoView);
@@ -32,12 +36,39 @@ public class ImageViewActivity extends Activity {
 		// Get the ID of the image to display and set it as the image for this ImageView
 		imageView.setImageResource(intent.getIntExtra(GridLayoutActivity.EXTRA_RES_ID, 0));
 		textView.setText("caption here");
+		
+		
+	}
+	
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
+			// Obtain photo from camera
+			photo = (Bitmap) data.getExtras().get("data");
+
+//			try {
+//				photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			Log.i("ACTIVITY RESULT","PhotUri: "+photoUri.toString());
+//			ImageView view = (ImageView) findViewById(R.id.imageViewTest);
+//			view.setImageBitmap(photo);
+			// Pass photo to upload activity
+			Intent uploadIntent = new Intent(ImageViewActivity.this, UploadUI.class);
+			uploadIntent.putExtra("photoBitmap", photo);
+			//uploadIntent.putExtra("photoUri", photoUri.toString());
+			startActivity(uploadIntent);
+		}
 	}
 	
 	
 	
 	
 	
+
 	/* ============ ACTION BAR ============= */
 	
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,11 +99,7 @@ public class ImageViewActivity extends Activity {
 			}
 			return true;
 		}
-		if (id == R.id.refresh) {
-			// DO THIS
-			makeToast("Refreshes images by grabbing updates from database");
-			return true;
-		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 	
@@ -111,7 +138,4 @@ public class ImageViewActivity extends Activity {
 	private void makeToast(String str) {
 		Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
 	}
-	
-	
-	
 }

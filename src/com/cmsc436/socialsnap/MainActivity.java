@@ -12,17 +12,22 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.example.socialsnap.R;
 
 public class MainActivity extends Activity {
 
@@ -30,6 +35,7 @@ public class MainActivity extends Activity {
 	private Bitmap photo = null;
 	private Uri photoUri = null;
 	private LocationManager locationManager;
+	private String mCurrentPhotoPath;
 	// Test
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,15 +50,15 @@ public class MainActivity extends Activity {
 						.isProviderEnabled(LocationManager.GPS_PROVIDER);
 				//Check if GPS is enabled before starting new activity
 				if (isGPSEnabled) {
-				    try {
-				        File photoFile = createImageFile();
+				    //try {
+				        //File photoFile = createImageFile();
 				        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				        photoUri = Uri.fromFile(photoFile);
-				        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+//				        photoUri = Uri.fromFile(new File(mCurrentPhotoPath));
+//				        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
 	                    startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-                    } catch (IOException e) {
-                        Toast.makeText(MainActivity.this, "Unable to write image" , Toast.LENGTH_LONG).show();
-                    }
+//                    } catch (IOException e) {
+//                        Toast.makeText(MainActivity.this, "Unable to write image" , Toast.LENGTH_LONG).show();
+//                    }
 				} else {
 					showSettingsAlert();
 				}
@@ -62,9 +68,19 @@ public class MainActivity extends Activity {
 		final Button viewPicturesButton = (Button) findViewById(R.id.view_pictures_button);
 		viewPicturesButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Intent galleryIntent = new Intent(MainActivity.this,
-						GridLayoutActivity.class);
-				startActivity(galleryIntent);
+				
+				locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+				Boolean isGPSEnabled = locationManager
+						.isProviderEnabled(LocationManager.GPS_PROVIDER);
+				//Check if GPS is enabled before starting new activity
+				if (isGPSEnabled) {
+					Intent galleryIntent = new Intent(MainActivity.this,
+							GridLayoutActivity.class);
+					startActivity(galleryIntent);
+				} else {
+					showSettingsAlert();
+				}
+				
 			}
 		});
 
@@ -74,10 +90,21 @@ public class MainActivity extends Activity {
 		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
 			// Obtain photo from camera
 			photo = (Bitmap) data.getExtras().get("data");
+
+//			try {
+//				photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			Log.i("ACTIVITY RESULT","PhotUri: "+photoUri.toString());
+//			ImageView view = (ImageView) findViewById(R.id.imageViewTest);
+//			view.setImageBitmap(photo);
 			// Pass photo to upload activity
 			Intent uploadIntent = new Intent(MainActivity.this, UploadUI.class);
 			uploadIntent.putExtra("photoBitmap", photo);
-			uploadIntent.putExtra("photoUri", photoUri.toString());
+			//uploadIntent.putExtra("photoUri", photoUri.toString());
 			startActivity(uploadIntent);
 		}
 	}
@@ -86,19 +113,32 @@ public class MainActivity extends Activity {
 	    // Create an image file name
 	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 	    String imageFileName = "JPEG_" + timeStamp + "_";
-	    File storageDir = Environment.getExternalStoragePublicDirectory(
-	            Environment.DIRECTORY_PICTURES);
+
+	    //File storageDir = getApplicationContext().getCacheDir(); 
+	    File storageDir = null;
+	    
+		Log.i("CREATE IMAGE FILE","Entering temp file");
 	    File image = File.createTempFile(
 	        imageFileName,  /* prefix */
 	        ".jpg",         /* suffix */
 	        storageDir      /* directory */
 	    );
+		Log.i("CREATE IMAGE FILE","Exited temp file");
 
 	    // Save a file: path for use with ACTION_VIEW intents
-	    // mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+	    mCurrentPhotoPath = "file:" + image.getAbsolutePath();
 	    return image;
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	/* ============ ACTION BAR ============= */
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -128,11 +168,7 @@ public class MainActivity extends Activity {
 			}
 			return true;
 		}
-		if (id == R.id.refresh) {
-			// DO THIS
-			makeToast("Refreshes images by grabbing updates from database");
-			return true;
-		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 
