@@ -69,8 +69,13 @@ public class UploadUI extends Activity implements
 		photoView.setImageBitmap(photoBitmap);
 
 		// Retrieve Uri of photo for upload
-		// photoUri = Uri.parse(photoIntent.getStringExtra("photoUri"));
-
+		try{
+		photoUri = Uri.parse(photoIntent.getStringExtra("photoUri"));
+		}catch (Exception e){
+			System.out.println("EFFED");
+		}
+		
+		
 		// Get comment------------
 		EditText editText = (EditText) findViewById(R.id.comment);
 		comment = editText.getText().toString();
@@ -188,6 +193,7 @@ public class UploadUI extends Activity implements
 						public void onClick(DialogInterface dialog, int which) {
 							(new MyImgurUploadTask(photoUri, title, comment))
 									.execute();
+														
 						}
 					});
 

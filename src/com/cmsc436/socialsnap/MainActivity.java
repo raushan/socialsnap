@@ -1,7 +1,9 @@
 package com.cmsc436.socialsnap;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.AndroidCharacter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,14 +54,15 @@ public class MainActivity extends Activity {
 				//Check if GPS is enabled before starting new activity
 				if (isGPSEnabled) {
 				    //try {
-				        //File photoFile = createImageFile();
+				        //Intent to open camera
 				        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//				        photoUri = Uri.fromFile(new File(mCurrentPhotoPath));
-//				        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-	                    startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-//                    } catch (IOException e) {
-//                        Toast.makeText(MainActivity.this, "Unable to write image" , Toast.LENGTH_LONG).show();
-//                    }
+				        File photoFile = createImageFile();
+				        if(photoFile != null){
+				        	photoUri = Uri.fromFile(photoFile);
+				            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+				            startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+				        }
+
 				} else {
 					showSettingsAlert();
 				}
@@ -89,7 +93,7 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
 			// Obtain photo from camera
-			photo = (Bitmap) data.getExtras().get("data");
+			
 
 //			try {
 //				photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
@@ -102,32 +106,45 @@ public class MainActivity extends Activity {
 //			ImageView view = (ImageView) findViewById(R.id.imageViewTest);
 //			view.setImageBitmap(photo);
 			// Pass photo to upload activity
+			
+			//photo = (Bitmap) data.getExtras().get("data");
+			ContentResolver c = getContentResolver();
+			Bitmap photo = null;
+			try {
+				photo = android.provider.MediaStore.Images.Media.getBitmap(c, photoUri);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			Intent uploadIntent = new Intent(MainActivity.this, UploadUI.class);
 			uploadIntent.putExtra("photoBitmap", photo);
-			//uploadIntent.putExtra("photoUri", photoUri.toString());
+			uploadIntent.putExtra("photoUri", photoUri.toString());
 			startActivity(uploadIntent);
 		}
 	}
 	
-	private File createImageFile() throws IOException {
+	@SuppressLint("SimpleDateFormat")
+	private File createImageFile() {
 	    // Create an image file name
-	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-	    String imageFileName = "JPEG_" + timeStamp + "_";
-
-	    //File storageDir = getApplicationContext().getCacheDir(); 
-	    File storageDir = null;
-	    
-		Log.i("CREATE IMAGE FILE","Entering temp file");
-	    File image = File.createTempFile(
-	        imageFileName,  /* prefix */
-	        ".jpg",         /* suffix */
-	        storageDir      /* directory */
-	    );
-		Log.i("CREATE IMAGE FILE","Exited temp file");
+		File photoFile=null;
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		String imageFileName = "JPEG_" + timeStamp + "_";
+		//check if media is mounted, and create a file for the image if it is using filename from above
+		Log.i("CREATE IMAGE FILE","Creating image file");
+		if(android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)){
+			photoFile = new File(android.os.Environment.getExternalStorageDirectory(), imageFileName);
+		}else{
+			photoFile = new File(getApplicationContext().getCacheDir(),imageFileName);
+			
+		}
 
 	    // Save a file: path for use with ACTION_VIEW intents
-	    mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-	    return image;
+	    mCurrentPhotoPath = "file:" + photoFile.getAbsolutePath();
+	    return photoFile;
 	}
 
 	
@@ -153,7 +170,7 @@ public class MainActivity extends Activity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_camera) {
-			// DO THIS
+			// TODO THIS
 
 			locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 			Boolean isGPSEnabled = locationManager
