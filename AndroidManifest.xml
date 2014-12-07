@@ -88,6 +88,7 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDfJ98yFfQjqlbfVMdKlV27qq2wTJTimCs" />
+        <activity android:name="DatabaseActivity"></activity>
     </application>
 
 </manifest>

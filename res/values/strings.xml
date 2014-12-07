@@ -11,5 +11,19 @@
 	<string name="add_comment">Add a comment!</string>
 	<string name="counter">140</string>
 	<string name="upload_string">Upload</string>
-    
+	<string name="info">App info</string>
+	<string name="paragraph">CMSC436 Semester Project \n \n
+        By Victor Ramos, Michael Cheung, \n Kris Salvador, Raushan Alleyne \n \n
+        
+        About the app: \n 
+        
+        \n \n
+        
+        Credits: \n
+        unsplash.com for Background \n
+        android-holo-colors.com for Icons \n
+        imgur.com for Image Hosting \n
+        Google Maps API \n
+        
+        </string>	    
 </resources>
