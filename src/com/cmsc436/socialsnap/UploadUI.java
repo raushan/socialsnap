@@ -1,11 +1,14 @@
 package com.cmsc436.socialsnap;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -15,17 +18,26 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,25 +65,31 @@ public class UploadUI extends Activity implements
 	private MyImgurUploadTask mImgurUploadTask;
 	private String mImgurUrl;
 	ImageView photoView;
+	private File photoFile = null;
+	private String mCurrentPhotoPath;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.upload);
-
+		ActionBar actionBar = getActionBar();
+		actionBar.setBackgroundDrawable(new ColorDrawable(0xFF29A6CF));
+		
 		textView = (TextView) findViewById(R.id.location);
 
 		Intent photoIntent = getIntent();
 
 		// Retrieve photo image for UI display
-		photoBitmap = (Bitmap) photoIntent.getParcelableExtra("photoBitmap");
+		Uri photoUri = (Uri) photoIntent.getParcelableExtra("photoUri");
+		try {
+			photoBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(photoUri));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		photoView = (ImageView) findViewById(R.id.photoView);
-		photoView.setScaleType(ScaleType.FIT_XY);
+		//photoView.setScaleType(ScaleType.FIT_XY);
 		photoView.setImageBitmap(photoBitmap);
 
-		// Retrieve Uri of photo for upload
-		// photoUri = Uri.parse(photoIntent.getStringExtra("photoUri"));
-
-		// Get comment------------
+		// Obtain comment from user input
 		EditText editText = (EditText) findViewById(R.id.comment);
 		comment = editText.getText().toString();
 		editText.addTextChangedListener(new TextWatcher() {
@@ -95,7 +113,7 @@ public class UploadUI extends Activity implements
 			}
 		});
 
-		// Get Location---------------
+		// Get Location from GPS
 
 		// Create LocationClient
 		mLocationClient = new LocationClient(this, this, this);
@@ -167,6 +185,7 @@ public class UploadUI extends Activity implements
 		MenuItem item = menu.findItem(R.id.char_counter);
 		charCount = (TextView) item.getActionView();
 		charCount.setText("80");
+		charCount.setTextColor(0xFFFFFFFF);
 		return true;
 	}
 
@@ -204,26 +223,62 @@ public class UploadUI extends Activity implements
 			return true;
 		}
 		if (id == R.id.action_camera) {
-			// DO THIS
-
-			LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-			Boolean isGPSEnabled = locationManager
-					.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
 			Intent cameraIntent = new Intent(
 					android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-			startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+			
+			
+			if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+				try {
+					photoFile = createImageFile();
+				} catch (IOException e) {
+					Toast.makeText(UploadUI.this,
+							"Unable to write image", Toast.LENGTH_LONG)
+							.show();
+				}
+				if (photoFile != null) {
+					photoUri = Uri.fromFile(photoFile);
+					cameraIntent
+							.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+					startActivityForResult(cameraIntent,
+							CAMERA_REQUEST_CODE);
 
+				}
+			}
 			return true;
 		}
+		
+		if (id == R.id.info) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			
+			LayoutInflater inflater= LayoutInflater.from(this);
+			View view = inflater.inflate(R.layout.info, null);
+
+			builder.setTitle("App Information");
+			builder.setView(view);
+			
+	        builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialog, int id) {
+	            	dialog.cancel();
+	            }
+	        });
+
+	        AlertDialog dialog = builder.create();
+	        dialog.show();
+			return true;
+		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
-			// Obtain photo from camera
-			photoBitmap = (Bitmap) data.getExtras().get("data");
-			photoView.setScaleType(ScaleType.FIT_XY);
+			// Obtain photo using Uri
+			try {
+				photoBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(photoUri));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			//photoView.setScaleType(ScaleType.FIT_XY);
 			photoView.setImageBitmap(photoBitmap);
 
 		}
@@ -317,6 +372,30 @@ public class UploadUI extends Activity implements
 						Toast.LENGTH_LONG).show();
 			}
 		}
+	}
+	
+	private File createImageFile() throws IOException {
+		// Create an image file name
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+				.format(new Date());
+		String imageFileName = "JPEG_" + timeStamp + "_";
+
+		// File storageDir = getApplicationContext().getCacheDir();
+		File storageDir = Environment
+				.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+		Log.i("CREATE IMAGE FILE", "Entering temp file");
+		File image = File.createTempFile(imageFileName, /* prefix */
+				".jpg", /* suffix */
+				storageDir /* directory */
+		);
+		Log.i("CREATE IMAGE FILE", "Exited temp file");
+
+		// Save a file: path for use with ACTION_VIEW intents
+		mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+		Log.i("CREATE IMAGE FILE", "File ==== " + mCurrentPhotoPath);
+
+		return image;
 	}
 
 }
