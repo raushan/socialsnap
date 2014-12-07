@@ -14,7 +14,6 @@
             android:id="@+id/photoView"
             android:layout_width="match_parent"
             android:layout_height="400dp"
-            
             android:contentDescription="@null"
             android:padding="8dp" />
 
@@ -31,15 +30,6 @@
                 android:contentDescription="@null"
                 android:src="@drawable/ic_action_location_foundcopy" />
 
-            <!--
-                 <TextView
-                android:id="@+id/location_string"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/location_string"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-            -->
-
             <TextView
                 android:id="@+id/location"
                 android:layout_width="wrap_content"
@@ -54,11 +44,11 @@
 
             <EditText
                 android:id="@+id/comment"
-                android:background="@drawable/rounded_corner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/icon"
                 android:layout_marginTop="5dp"
+                android:background="@drawable/rounded_corner"
                 android:ems="10"
                 android:hint="@string/add_comment"
                 android:lines="3"
