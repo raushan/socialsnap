@@ -1,22 +1,19 @@
 package com.cmsc436.socialsnap;
 
-import android.app.Activity;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.util.Log;
-
-import org.json.JSONObject;
-
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Scanner;
+
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.util.Log;
 
 public abstract class ImgurUploadTask extends AsyncTask<Void, Void, String> {
     
@@ -50,32 +47,21 @@ public abstract class ImgurUploadTask extends AsyncTask<Void, Void, String> {
 
         try {
             conn = (HttpURLConnection) new URL(UPLOAD_URL).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
             conn.setDoOutput(true);
             
             // Set up auth for Imgur upload
             conn.setRequestProperty("Authorization", "Client-ID " + SocialSnapConstants.MY_IMGUR_CLIENT_ID);
-            conn.setRequestProperty("title", mTitle);
-            conn.setRequestProperty("description", mComment);
+            
             Log.i("ImgurUpload", mTitle + " " + mComment);
-            // Add title and descriptions params
-            StringBuilder postParams = new StringBuilder();
-//            //postParams.append("&");
-//            postParams.append(URLEncoder.encode("title", "UTF-8"));
-//            postParams.append("=");
-//            postParams.append(URLEncoder.encode(mTitle, "UTF-8"));
-//            postParams.append("&");
-//            postParams.append(URLEncoder.encode("description", "UTF-8"));
-//            postParams.append("=");
-//            postParams.append(URLEncoder.encode(mComment, "UTF-8"));
             
             // Write params and imageUri to connection
             OutputStream out = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
             copy(imageIn, out);
-            writer.write(postParams.toString());
             out.flush();
             out.close();
-
+            //conn.connect();
             // Successful POST to Imgur
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 responseIn = conn.getInputStream();
@@ -108,7 +94,7 @@ public abstract class ImgurUploadTask extends AsyncTask<Void, Void, String> {
             } catch (Exception ignore) {}
         }
     }
-
+    
     private static int copy(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[8192];
         int count = 0;

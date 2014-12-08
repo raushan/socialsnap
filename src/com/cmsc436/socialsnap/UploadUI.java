@@ -202,7 +202,6 @@ public class UploadUI extends Activity implements
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_upload) {
-			comment = editText.getText().toString();
 
 			AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
@@ -372,11 +371,12 @@ public class UploadUI extends Activity implements
 		protected void onPostExecute(String imageId) {
 			super.onPostExecute(imageId);
 			mImgurUploadTask = null;
+			comment = editText.getText().toString();
 
 			if (imageId != null) {
-				mImgurUrl = "http://imgur.com/" + imageId;
+				mImgurUrl = "http://i.imgur.com/" + imageId + ".jpg";
 				Log.i("Post execute", "ImageURL : "+mImgurUrl+", Lat : "+ mCurrentLocation.getLatitude()+ ", Long : "+mCurrentLocation.getLongitude());
-				(new DatabaseTask(mImgurUrl, mCurrentLocation, UploadUI.this)).execute();
+				(new DatabaseTask(mImgurUrl, mCurrentLocation, comment, UploadUI.this)).execute();
 				
 			} else {
 				mImgurUrl = null;

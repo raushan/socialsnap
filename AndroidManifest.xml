@@ -5,8 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:minSdkVersion="16"
+        android:targetSdkVersion="19" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -37,7 +37,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.cmsc436.socialsnap.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" 
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -81,7 +82,8 @@
         <activity
             android:name="com.cmsc436.socialsnap.UploadUI"
             android:parentActivityName="com.cmsc436.socialsnap.MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden" >
+            android:windowSoftInputMode="adjustResize|stateHidden" 
+            android:screenOrientation="portrait">
         </activity>
 
         <meta-data

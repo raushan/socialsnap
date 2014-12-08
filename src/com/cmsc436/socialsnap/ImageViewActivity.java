@@ -1,8 +1,13 @@
 package com.cmsc436.socialsnap;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.example.socialsnap.R;
@@ -10,22 +15,30 @@ import com.example.socialsnap.R;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class ImageViewActivity extends Activity {
 
@@ -33,6 +46,7 @@ public class ImageViewActivity extends Activity {
 	private String mCurrentPhotoPath;
 	private File photoFile;
 	private Uri photoUri;
+	private ImageView imageView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,14 +57,16 @@ public class ImageViewActivity extends Activity {
 		setContentView(R.layout.viewimage);
 		Intent intent = getIntent();
 
-		ImageView imageView = (ImageView) findViewById(R.id.photoView);
+		imageView = (ImageView) findViewById(R.id.photoView);
 		TextView textView = (TextView) findViewById(R.id.caption);
 
 		// Get the ID of the image to display and set it as the image for this
 		// ImageView
-		imageView.setImageResource(intent.getIntExtra(
-				GridLayoutActivity.EXTRA_RES_ID, 0));
-		textView.setText("caption here");
+		String curUrl = intent.getStringExtra("Bitmap");
+		(new ImgurViewTask(curUrl)).execute();
+		textView.setGravity(Gravity.CENTER);
+		textView.setText(intent.getStringExtra("Comment"));
+		
 		textView.setTextColor(0xFFFFFFFF);
 
 	}
@@ -187,5 +203,37 @@ public class ImageViewActivity extends Activity {
 
 	private void makeToast(String str) {
 		Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+	}
+
+	private class ImgurViewTask extends
+			AsyncTask<Void, Void, Bitmap> {
+		String imageUrl;
+		public ImgurViewTask(String url) {
+			this.imageUrl = url;
+		}
+		
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			Bitmap bitmap = null;
+			try {
+				bitmap = BitmapFactory
+						.decodeStream((InputStream) new URL(imageUrl)
+								.getContent());
+				
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			return bitmap;
+
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap photo) {
+			imageView.setImageBitmap(photo);
+		}
+
 	}
 }

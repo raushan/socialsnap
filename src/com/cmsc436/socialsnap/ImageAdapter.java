@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -39,7 +40,11 @@ public class ImageAdapter extends BaseAdapter {
 	// is passed to OnItemClickListener.onItemClick()
 	@Override
 	public long getItemId(int position) {
-		return (Long) null;
+		return position;
+	}
+	
+	public void clear() {
+		mPhotos.clear();
 	}
 
 	// Return an ImageView for each item referenced by the Adapter
@@ -55,7 +60,7 @@ public class ImageAdapter extends BaseAdapter {
 			//imageView.setPadding(PADDING, PADDING, PADDING, PADDING);
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		}
-
+		Log.i("ImageAdpapter", "Setting image bitmap");
 		imageView.setImageBitmap(mPhotos.get(position));
 		return imageView;
 	}
