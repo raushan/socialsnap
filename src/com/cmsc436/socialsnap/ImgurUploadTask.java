@@ -54,10 +54,11 @@ public abstract class ImgurUploadTask extends AsyncTask<Void, Void, String> {
             
             // Set up auth for Imgur upload
             conn.setRequestProperty("Authorization", "Client-ID " + SocialSnapConstants.MY_IMGUR_CLIENT_ID);
-            
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("title", mTitle);
             // Add title and descriptions params
             StringBuilder postParams = new StringBuilder();
-            postParams.append("&");
+            //postParams.append("&");
             postParams.append(URLEncoder.encode("title", "UTF-8"));
             postParams.append("=");
             postParams.append(URLEncoder.encode(mTitle, "UTF-8"));

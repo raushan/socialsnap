@@ -1,13 +1,28 @@
 package com.cmsc436.socialsnap;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.example.socialsnap.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -28,11 +43,13 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -60,6 +77,7 @@ public class GridLayoutActivity extends FragmentActivity implements
 	private File photoFile = null;
 	private String mCurrentPhotoPath;
 	private Uri photoUri;
+	private JSONArray json;
 
 	private static final LocationRequest REQUEST = LocationRequest.create()
 			.setInterval(5000) // 5 seconds
@@ -73,6 +91,10 @@ public class GridLayoutActivity extends FragmentActivity implements
 					R.drawable.image9, R.drawable.image10, R.drawable.image11,
 					R.drawable.image12));
 
+	private ArrayList<Bitmap> mPhotos = new ArrayList<Bitmap>();
+	private ArrayList<String> mPhotoLinks = new ArrayList<String>();
+
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -84,33 +106,13 @@ public class GridLayoutActivity extends FragmentActivity implements
 		setUpGoogleApiClientIfNeeded();
 		mGoogleApiClient.connect();
 
-		GridView gridview = (GridView) findViewById(R.id.gridview);
-
-		// Create a new ImageAdapter and set it as the Adapter for this GridView
-		gridview.setAdapter(new ImageAdapter(this, mThumbIdsFlowers));
-
-		// Set an setOnItemClickListener on the GridView
-		gridview.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-
-				// Create an Intent to start the ImageViewActivity
-				Intent intent = new Intent(GridLayoutActivity.this,
-						ImageViewActivity.class);
-
-				// Add the ID of the thumbnail to display as an Intent Extra
-				intent.putExtra(EXTRA_RES_ID, (int) id);
-
-				// Start the ImageViewActivity
-				startActivity(intent);
-			}
-		});
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != RESULT_CANCELED && requestCode == CAMERA_REQUEST_CODE) {
 			// Pass photo Uri to upload activity
-			Intent uploadIntent = new Intent(GridLayoutActivity.this, UploadUI.class);
+			Intent uploadIntent = new Intent(GridLayoutActivity.this,
+					UploadUI.class);
 			uploadIntent.putExtra("photoUri", photoUri);
 			Log.i("GridLayoutActivity on result", "Starting upload activity");
 			startActivity(uploadIntent);
@@ -203,6 +205,31 @@ public class GridLayoutActivity extends FragmentActivity implements
 				mGoogleApiClient).getLatitude();
 		Double lng = LocationServices.FusedLocationApi.getLastLocation(
 				mGoogleApiClient).getLongitude();
+
+		GridView gridview = (GridView) findViewById(R.id.gridview);
+		// Fill arraylist with images from database
+		(new DatabaseRetrieveTask(lat, lng)).execute();
+		
+
+		// Create a new ImageAdapter and set it as the Adapter for this GridView
+		gridview.setAdapter(new ImageAdapter(this, mPhotos));
+
+		// Set an setOnItemClickListener on the GridView
+		gridview.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View v,
+					int position, long id) {
+
+				// Create an Intent to start the ImageViewActivity
+				Intent intent = new Intent(GridLayoutActivity.this,
+						ImageViewActivity.class);
+
+				// Add the ID of the thumbnail to display as an Intent Extra
+				intent.putExtra(EXTRA_RES_ID, (int) id);
+
+				// Start the ImageViewActivity
+				startActivity(intent);
+			}
+		});
 
 		LatLng a = new LatLng(lat, lng);
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(a, 15));
@@ -351,6 +378,106 @@ public class GridLayoutActivity extends FragmentActivity implements
 
 	private void makeToast(String str) {
 		Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+	}
+
+	private class DatabaseRetrieveTask extends AsyncTask<Void, Void, JSONArray> {
+		int statuscode = -99;
+		String result = "";
+
+		private double latitude;
+		private double longitude;
+
+		public DatabaseRetrieveTask(double lat, double lng) {
+			this.latitude = lat;
+			this.longitude = lng;
+		}
+
+		@Override
+		protected JSONArray doInBackground(Void... params) {
+			Log.i("Database Retrieve", "Entered doInBackground retrieve");
+
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(
+					"http://cmsc436socialsnapapp.appspot.com");
+
+			try {
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+						2);
+				nameValuePairs.add(new BasicNameValuePair("latitude", String
+						.valueOf(latitude)));
+				nameValuePairs.add(new BasicNameValuePair("longitude", String
+						.valueOf(longitude)));
+				nameValuePairs.add(new BasicNameValuePair("source", "script"));
+				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				HttpResponse response = httpclient.execute(httppost);
+				statuscode = response.getStatusLine().getStatusCode();
+
+				HttpEntity entity = response.getEntity();
+				InputStream instream = entity.getContent();
+				result = getStringFromStream(instream);
+
+			} catch (IOException e) {
+				return null;
+			}
+
+			try {
+				Log.i("Database Retrieve", "Trying to return result");
+
+				return new JSONArray(result);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				Toast.makeText(getApplicationContext(),
+						"Error retrieving images", Toast.LENGTH_LONG).show();
+			}
+			Log.i("Database Retrieve", "Json = empty");
+
+			return new JSONArray();
+
+		}
+
+		@Override
+		protected void onPostExecute(JSONArray output) {
+			if (output.length() != 0) {
+				Log.i("Database Retrieve", "Json = output");
+
+				json = output;
+				JSONObject mJsonObject = new JSONObject();
+				for (int i = 0; i < json.length(); i++) {
+					try {
+						mJsonObject = json.getJSONObject(i);
+						Log.i("GridLayoutActivity JSONObject", "Json object : "+mJsonObject.toString());
+
+						String url = mJsonObject.getString("image_url");
+						// Use url to get image from imgur
+
+					} catch (JSONException e) {
+						Toast.makeText(getApplicationContext(),
+								"Error retrieving images", Toast.LENGTH_LONG).show();
+					}
+
+				}
+			} else {
+				Log.i("Database Retrieve", "Json length = 0");
+			}
+		}
+
+		private String getStringFromStream(InputStream s) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(s));
+			StringBuilder out = new StringBuilder();
+			String line;
+			try {
+				while ((line = reader.readLine()) != null) {
+					out.append(line);
+				}
+				reader.close();
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return out.toString();
+		}
+
 	}
 
 }

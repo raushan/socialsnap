@@ -51,6 +51,7 @@ public class ImageViewActivity extends Activity {
 		imageView.setImageResource(intent.getIntExtra(
 				GridLayoutActivity.EXTRA_RES_ID, 0));
 		textView.setText("caption here");
+		textView.setTextColor(0xFFFFFFFF);
 
 	}
 
