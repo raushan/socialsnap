@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,9 +44,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -78,26 +84,22 @@ public class GridLayoutActivity extends FragmentActivity implements
 	private String mCurrentPhotoPath;
 	private Uri photoUri;
 	private JSONArray json;
+	private Context mContext;
 
 	private static final LocationRequest REQUEST = LocationRequest.create()
 			.setInterval(5000) // 5 seconds
 			.setFastestInterval(16) // 16ms = 60fps
 			.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-	private ArrayList<Integer> mThumbIdsFlowers = new ArrayList<Integer>(
-			Arrays.asList(R.drawable.image1, R.drawable.image2,
-					R.drawable.image3, R.drawable.image4, R.drawable.image5,
-					R.drawable.image6, R.drawable.image7, R.drawable.image8,
-					R.drawable.image9, R.drawable.image10, R.drawable.image11,
-					R.drawable.image12));
+
 
 	private ArrayList<Bitmap> mPhotos = new ArrayList<Bitmap>();
 	private ArrayList<String> mPhotoLinks = new ArrayList<String>();
 
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mContext = getApplicationContext();
 		setContentView(R.layout.gallery);
 		ActionBar actionBar = getActionBar();
 		actionBar.setBackgroundDrawable(new ColorDrawable(0xFF29A6CF));
@@ -205,31 +207,8 @@ public class GridLayoutActivity extends FragmentActivity implements
 				mGoogleApiClient).getLatitude();
 		Double lng = LocationServices.FusedLocationApi.getLastLocation(
 				mGoogleApiClient).getLongitude();
-
-		GridView gridview = (GridView) findViewById(R.id.gridview);
 		// Fill arraylist with images from database
 		(new DatabaseRetrieveTask(lat, lng)).execute();
-		
-
-		// Create a new ImageAdapter and set it as the Adapter for this GridView
-		gridview.setAdapter(new ImageAdapter(this, mPhotos));
-
-		// Set an setOnItemClickListener on the GridView
-		gridview.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-
-				// Create an Intent to start the ImageViewActivity
-				Intent intent = new Intent(GridLayoutActivity.this,
-						ImageViewActivity.class);
-
-				// Add the ID of the thumbnail to display as an Intent Extra
-				intent.putExtra(EXTRA_RES_ID, (int) id);
-
-				// Start the ImageViewActivity
-				startActivity(intent);
-			}
-		});
 
 		LatLng a = new LatLng(lat, lng);
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(a, 15));
@@ -445,17 +424,23 @@ public class GridLayoutActivity extends FragmentActivity implements
 				for (int i = 0; i < json.length(); i++) {
 					try {
 						mJsonObject = json.getJSONObject(i);
-						Log.i("GridLayoutActivity JSONObject", "Json object : "+mJsonObject.toString());
-
+						Log.i("GridLayoutActivity JSONObject", "Json object : "
+								+ mJsonObject.toString());
+						mJsonObject = mJsonObject.getJSONObject("fields");
 						String url = mJsonObject.getString("image_url");
+						String jpgUrl = "http://i." + url.substring(7) + ".jpg";
+						mPhotoLinks.add(jpgUrl);
 						// Use url to get image from imgur
-
+						Log.i("GridLayoutActivity JSONObject",
+								"Json image url : " + url);
 					} catch (JSONException e) {
 						Toast.makeText(getApplicationContext(),
-								"Error retrieving images", Toast.LENGTH_LONG).show();
+								"Error retrieving images", Toast.LENGTH_LONG)
+								.show();
 					}
-
 				}
+
+				(new ImgurViewTask()).execute();
 			} else {
 				Log.i("Database Retrieve", "Json length = 0");
 			}
@@ -476,6 +461,70 @@ public class GridLayoutActivity extends FragmentActivity implements
 				e.printStackTrace();
 			}
 			return out.toString();
+		}
+
+	}
+
+	private class ImgurViewTask extends
+			AsyncTask<Void, Void, ArrayList<Bitmap>> {
+		ProgressDialog pdLoading = new ProgressDialog(GridLayoutActivity.this);
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pdLoading.setMessage("Loading Images...");
+			pdLoading.show();
+		}
+
+		@Override
+		protected ArrayList<Bitmap> doInBackground(Void... params) {
+			InputStream is;
+			for (String stringurl : mPhotoLinks) {
+
+				Log.i("ImgurViewTask", "Getting image from :" + stringurl);
+
+				try {
+					Bitmap bitmap = BitmapFactory
+							.decodeStream((InputStream) new URL(stringurl)
+									.getContent());
+					mPhotos.add(bitmap);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			return mPhotos;
+
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<Bitmap> photos) {
+	        pdLoading.dismiss();
+
+			GridView gridview = (GridView) findViewById(R.id.gridview);
+
+			// Create a new ImageAdapter and set it as the Adapter for this
+			// GridView
+			gridview.setAdapter(new ImageAdapter(mContext, photos));
+
+			// Set an setOnItemClickListener on the GridView
+			gridview.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent, View v,
+						int position, long id) {
+
+					// Create an Intent to start the ImageViewActivity
+					Intent intent = new Intent(GridLayoutActivity.this,
+							ImageViewActivity.class);
+
+					// Add the ID of the thumbnail to display as an Intent Extra
+					intent.putExtra(EXTRA_RES_ID, (int) id);
+
+					// Start the ImageViewActivity
+					startActivity(intent);
+				}
+			});
+
 		}
 
 	}

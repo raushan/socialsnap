@@ -22,7 +22,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!--
          The following two permissions are not required to use
-	     Google Maps Android API v2, but are recommended.
+	     Google Maps Android API v2, but are recommended.
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -46,7 +46,8 @@
         </activity>
         <activity
             android:name="com.cmsc436.socialsnap.ImageViewActivity"
-            android:parentActivityName="com.cmsc436.socialsnap.GridLayoutActivity" >
+            android:parentActivityName="com.cmsc436.socialsnap.GridLayoutActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" >
                 </action>
@@ -62,7 +63,8 @@
         </activity>
         <activity
             android:name="com.cmsc436.socialsnap.GridLayoutActivity"
-            android:parentActivityName="com.cmsc436.socialsnap.MainActivity" >
+            android:parentActivityName="com.cmsc436.socialsnap.MainActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" >
                 </action>
