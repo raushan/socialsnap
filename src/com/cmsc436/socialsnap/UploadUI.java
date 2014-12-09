@@ -73,6 +73,7 @@ public class UploadUI extends Activity implements
 	ImageView photoView;
 	private File photoFile = null;
 	private String mCurrentPhotoPath;
+	EditText editText;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,8 +97,7 @@ public class UploadUI extends Activity implements
 		photoView.setImageBitmap(photoBitmap);
 
 		// Obtain comment from user input
-		EditText editText = (EditText) findViewById(R.id.comment);
-		comment = editText.getText().toString();
+		editText = (EditText) findViewById(R.id.comment);
 		editText.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before,
@@ -202,6 +202,7 @@ public class UploadUI extends Activity implements
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_upload) {
+
 			AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
 			// Setting Dialog Message
@@ -370,9 +371,12 @@ public class UploadUI extends Activity implements
 		protected void onPostExecute(String imageId) {
 			super.onPostExecute(imageId);
 			mImgurUploadTask = null;
+			comment = editText.getText().toString();
+
 			if (imageId != null) {
-				mImgurUrl = "http://imgur.com/" + imageId;
-				(new DatabaseTask(mImgurUrl, mCurrentLocation, UploadUI.this)).execute();
+				mImgurUrl = "http://i.imgur.com/" + imageId + ".jpg";
+				Log.i("Post execute", "ImageURL : "+mImgurUrl+", Lat : "+ mCurrentLocation.getLatitude()+ ", Long : "+mCurrentLocation.getLongitude());
+				(new DatabaseTask(mImgurUrl, mCurrentLocation, comment, UploadUI.this)).execute();
 				
 			} else {
 				mImgurUrl = null;

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Social Snap</string>
-    <string name="social_snap">Welcome to Social Snap!</string>
+    <string name="social_snap">Social Snap</string>
     <string name="camera">Camera</string>
 	<string name="refresh">Refresh</string>
 	<string name="take_picture">Take Picture</string>
@@ -11,19 +11,22 @@
 	<string name="add_comment">Add a comment!</string>
 	<string name="counter">140</string>
 	<string name="upload_string">Upload</string>
-	<string name="info">App info</string>
-	<string name="paragraph">CMSC436 Semester Project \n \n
-        By Victor Ramos, Michael Cheung, \n Kris Salvador, Raushan Alleyne \n \n
+	<string name="info">App Info</string>
+    <string name="paragraph">CMSC436 Semester Project \n \n
+        By Victor Ramos, Michael Cheung, \n Kris Salvador, Raushan Alleyne \n \n \n
         
         About the app: \n 
-        
-        \n \n
+        "Take Picture" will bring up a camera, allowing you to take a picture and add a comment. 
+        Location will be automatically tagged. Image and comment will be uploaded for anyone to see. \n \n
+        "View Pictures" will show your location on a Google Map. It will also load all images 
+        tagged at the specified location. Clicking on an image will bring up a bigger preview
+        screen and allow you to see the comment/caption associated with the picture.
+        \n \n \n
         
         Credits: \n
         unsplash.com for Background \n
         android-holo-colors.com for Icons \n
         imgur.com for Image Hosting \n
         Google Maps API \n
-        
-        </string>	    
+        </string>
 </resources>

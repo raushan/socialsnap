@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
 			// Pass photo Uri to upload activity
 			Intent uploadIntent = new Intent(MainActivity.this, UploadUI.class);
 			uploadIntent.putExtra("photoUri", photoUri);
-			Log.i("MainActivity on result", "Starting upload activity");
+			//Log.i("MainActivity on result", "Starting upload activity");
 			startActivity(uploadIntent);
 		}
 	}
