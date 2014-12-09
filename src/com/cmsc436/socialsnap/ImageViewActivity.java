@@ -32,7 +32,9 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -58,15 +60,27 @@ public class ImageViewActivity extends Activity {
 		Intent intent = getIntent();
 
 		imageView = (ImageView) findViewById(R.id.photoView);
-		TextView textView = (TextView) findViewById(R.id.caption);
+		final TextView textView = (TextView) findViewById(R.id.caption);
 
 		// Get the ID of the image to display and set it as the image for this
 		// ImageView
 		String curUrl = intent.getStringExtra("Bitmap");
 		(new ImgurViewTask(curUrl)).execute();
+
+		imageView.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (textView.getVisibility() == View.VISIBLE) {
+					textView.setVisibility(View.INVISIBLE);
+				} else {
+					textView.setVisibility(View.VISIBLE);
+				}
+			}
+		});
 		textView.setGravity(Gravity.CENTER);
 		textView.setText(intent.getStringExtra("Comment"));
-		
+
 		textView.setTextColor(0xFFFFFFFF);
 
 	}
@@ -205,21 +219,20 @@ public class ImageViewActivity extends Activity {
 		Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
 	}
 
-	private class ImgurViewTask extends
-			AsyncTask<Void, Void, Bitmap> {
+	private class ImgurViewTask extends AsyncTask<Void, Void, Bitmap> {
 		String imageUrl;
+
 		public ImgurViewTask(String url) {
 			this.imageUrl = url;
 		}
-		
+
 		@Override
 		protected Bitmap doInBackground(Void... params) {
 			Bitmap bitmap = null;
 			try {
-				bitmap = BitmapFactory
-						.decodeStream((InputStream) new URL(imageUrl)
-								.getContent());
-				
+				bitmap = BitmapFactory.decodeStream((InputStream) new URL(
+						imageUrl).getContent());
+
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
